@@ -27,6 +27,12 @@ func main() {
 
 	pl("Hello", name)
 
-	variables()
-	cast()
+	/*
+		variables()
+		cast()
+		importantBirthdays()
+	*/
+
+	stringsEx()
+	rune()
 }

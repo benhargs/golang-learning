@@ -48,4 +48,7 @@ func cast() {
 	cV5 := "500000000000"
 	cV6, err := strconv.Atoi(cV5)
 	pl(cV6, err, reflect.TypeOf(cV5))
+	cV7 := 123
+	cV8 := strconv.Itoa(cV7)
+	pl(cV8, reflect.TypeOf(cV8))
 }
