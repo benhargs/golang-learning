@@ -58,8 +58,5 @@ func main() {
 		mathsEx()
 		forloop()
 	*/
-
-	//higherLower()
-	A := []int{1, 2, 3, 4, 0}
-	pl(Solution(A))
+	//higherLower
 }
