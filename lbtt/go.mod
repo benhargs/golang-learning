@@ -1,4 +1,3 @@
-module github.com/benhargs/golang-learning/lbtt
+module lbtt
 
 go 1.22.4
-

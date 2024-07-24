@@ -1,6 +1,9 @@
-package main
+package lbtt
 
-import "lbtt/taxValues/taxValues2024/tax"
+import (
+	"fmt"
+	tax "lbtt/taxValues"
+)
 
 /*
 Land and Buildings Transaction Tax (LBTT) is applied to residential properties.
@@ -30,33 +33,61 @@ Value = 235,000
 So the LBTT amount is: £1,800
 */
 
-func nilTaxBelow145K(houseValue float64) float64 {
-	return float64(0)
+func calculateTotalLBTT(houseValue float64) float64 {
+	var (
+		totalTaxValue float64 = 0
+
+		//Calling global variables from tax package
+		twoPercentTaxMin    = tax.TwoPercentTaxMinBase
+		fivePercentTaxMin   = tax.FivePercentTaxMinBase
+		tenPercentTaxMin    = tax.TenPercentTaxMinBase
+		twelvePercentTaxMin = tax.TwelvePercentTaxMinBase
+	)
+
+	if houseValue <= twoPercentTaxMin {
+		return totalTaxValue
+	}
+
+	if houseValue >= twoPercentTaxMin {
+		tax2PercentBandValue := calculateTaxBandof2Percent(houseValue)
+		fmt.Println(tax2PercentBandValue)
+		totalTaxValue += tax2PercentBandValue
+		fmt.Println(totalTaxValue)
+	}
+
+	if houseValue >= fivePercentTaxMin {
+		tax5PercentBandValue := calculateTaxBandof5Percent(houseValue)
+
+		totalTaxValue += tax5PercentBandValue
+	}
+
+	if houseValue >= tenPercentTaxMin {
+		tax10PercentBandValue := calculateTaxBandOf10Percent(houseValue)
+
+		totalTaxValue += tax10PercentBandValue
+	}
+
+	if houseValue >= twelvePercentTaxMin {
+		tax12PercentBandValue := calculateTaxBandOf12Percent(houseValue)
+
+		totalTaxValue += tax12PercentBandValue
+	}
+
+	return totalTaxValue
 }
 
 func calculateTaxBandof2Percent(houseValue float64) float64 {
-	var bandMin float64 = tax.TwoPercentTaxBase
-	var bandMax float64 = tax.FivePercentTaxBase
+	var bandMin float64 = tax.TwoPercentTaxMinBase
+	var bandMax float64 = tax.FivePercentTaxMinBase
 	var taxDecimal float64 = tax.TwoPercentTaxValue
 
-	if houseValue >= bandMax {
+	taxValue := calculateTaxForNonMaxBands(houseValue, bandMax, bandMin, taxDecimal)
 
-		taxValue := calculateMaxTaxForABound(bandMax, bandMin, taxDecimal)
-
-		return taxValue
-	}
-
-	if bandMin < houseValue {
-		taxValue := calculateTaxWithinABound(houseValue, taxDecimal, bandMin)
-
-		return float64(taxValue)
-	}
-
-	return float64(0)
+	return taxValue
 }
 
 func calculateTaxBandof5Percent(houseValue float64) float64 {
-	var bandMin float64 = tax.FivePercentTaxBase
+	var bandMin float64 = tax.FivePercentTaxMinBase
 	var bandMax float64 = tax.TenPercentTaxMinBase
 	var taxDecimal float64 = tax.FivePercentTaxValue
 
@@ -69,17 +100,17 @@ func calculateTaxBandof5Percent(houseValue float64) float64 {
 	//Tax that is within the bounds
 	if bandMin < houseValue {
 
-		taxValue := calculateMaxTaxForABound(bandMax, bandMin, taxDecimal)
+		taxValue := calculateTaxWithinABound(houseValue, bandMin, taxDecimal)
 
 		return taxValue
 	}
 
-	return float64(0)
+	return 0.00
 }
 
 func calculateTaxBandOf10Percent(houseValue float64) float64 {
-	var bandMin float64 = tax.TenPercentTaxBase
-	var bandMax float64 = tax.TwelvePercentTaxBase
+	var bandMin float64 = tax.TenPercentTaxMinBase
+	var bandMax float64 = tax.TwelvePercentTaxMinBase
 	var taxDecimal float64 = tax.TenPercentTaxValue
 
 	if houseValue >= bandMax {
@@ -88,32 +119,32 @@ func calculateTaxBandOf10Percent(houseValue float64) float64 {
 		return taxValue
 	}
 
-	if houseValue > bandMin {
+	if houseValue >= bandMin {
 
-		taxValue := calculateMaxTaxForABound(bandMax, bandMin, taxDecimal)
+		taxValue := calculateTaxWithinABound(houseValue, bandMin, taxDecimal)
 
 		return taxValue
 	}
 
-	return float64(0)
+	return 0.00
 }
 
 func calculateTaxBandOf12Percent(houseValue float64) float64 {
-	bandBase := float64(750000)
-	taxBase := 0.12
+	var bandMin float64 = tax.TwelvePercentTaxMinBase
+	var taxDecimal float64 = tax.TwelvePercentTaxValue
 
-	if houseValue > bandBase {
-		taxValue := calculateTaxWithinABound(houseValue, taxBase, bandBase)
+	if houseValue >= bandMin {
+		taxValue := calculateTaxWithinABound(houseValue, bandMin, taxDecimal)
 
 		return taxValue
 	}
 
-	return float64(0)
+	return 0.00
 }
 
-func calculateTaxWithinABound(houseValue, taxBase, bandBase float64) float64 {
-	bandValue := houseValue - bandBase
-	taxValue := bandValue * taxBase
+func calculateTaxWithinABound(houseValue, bandMin, taxDecimal float64) float64 {
+	bandValue := houseValue - bandMin
+	taxValue := bandValue * taxDecimal
 
 	return taxValue
 }
@@ -125,44 +156,23 @@ func calculateMaxTaxForABound(bandMax, bandMin, taxDecimal float64) float64 {
 	return maxTaxValue
 }
 
-func calculateTotalLBTT(houseValue float64) float64 {
-	var totalTaxValue float64 = 0
+func calculateTaxForNonMaxBands(houseValue, bandMax, bandMin, taxDecimal float64) float64 {
+	var taxValue float64 = 0
+	var bandValue float64 = houseValue - bandMin
 
-	//Calling global variables from tax package
-	var twoPercentTaxMin = tax.TwoPercentTaxMinBase
-	var fivePercentTaxMin = tax.FivePercentTaxMinBase
-	var tenPercentTaxMin = tax.TenPercentTaxMinBase
-	var twelvePercentTaxMin = tax.TwelvePercentTaxMinBase
+	if houseValue >= bandMax {
 
-	if houseValue < twoPercentTaxMin {
-		totalTaxValue = nilTaxBelow145K(houseValue)
+		taxValue = bandMax * taxDecimal
 
-		return totalTaxValue
+		return taxValue
 	}
 
-	if houseValue > twoPercentTaxMin {
-		tax2PercentBandValue := calculateTaxBandof2Percent(houseValue)
+	if houseValue >= bandMin {
 
-		totalTaxValue += tax2PercentBandValue
+		taxValue = bandValue * taxDecimal
+
+		return taxValue
 	}
 
-	if houseValue > fivePercentTaxMin {
-		tax5PercentBandValue := calculateTaxBandof5Percent(houseValue)
-
-		totalTaxValue += tax5PercentBandValue
-	}
-
-	if houseValue > tenPercentTaxMin {
-		tax10PercentBandValue := calculateTaxBandOf10Percent(houseValue)
-
-		totalTaxValue += tax10PercentBandValue
-	}
-
-	if houseValue > twelvePercentTaxMin {
-		tax12PercentBandValue := calculateTaxBandOf12Percent(houseValue)
-
-		totalTaxValue += tax12PercentBandValue
-	}
-
-	return totalTaxValue
+	return float64(0)
 }
