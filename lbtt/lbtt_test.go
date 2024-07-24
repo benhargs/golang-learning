@@ -5,6 +5,84 @@ import (
 	"testing"
 )
 
+func TestTaxBandswithMaxBoundaryCases(t *testing.T) {
+
+	//2 percent tax values:
+	var twoPercentTaxMinBase float64 = tax.TwoPercentTaxMinBase
+	var twoPercentTaxValue float64 = tax.TwoPercentTaxValue
+
+	// 5 percent tax values:
+	var fivePercentTaxMinBase float64 = tax.FivePercentTaxMinBase
+	var fivePercentTaxValue float64 = tax.FivePercentTaxValue
+
+	// 10 percent tax values:
+	var tenPercentTaxMinBase float64 = tax.TenPercentTaxMinBase
+	var tenPercentTaxValue float64 = tax.TenPercentTaxValue
+	var tenPercentTaxMax float64 = tax.TwelvePercentTaxMinBase
+
+	taxBand := []struct {
+		name       string
+		percentage int
+		houseValue float64
+		want       float64
+	}{
+		//2 percent tests
+		{"No Tax", 2, twoPercentTaxMinBase, 0},
+		{"Minimum amount of Tax in bound", 2, twoPercentTaxMinBase + 1, twoPercentTaxValue},
+		{"Maximum amount of property value -1 in bound", 2, fivePercentTaxMinBase - 1, 2099.98},
+		{"Maximum amount of within max band of Tax", 2, fivePercentTaxMinBase, 2100},
+		{"No more Tax beyond max bound", 2, fivePercentTaxMinBase + 1, 2100},
+
+		// five percent tests
+		{"No Tax", 5, fivePercentTaxMinBase, 0},
+		{"Minimum amount of Tax", 5, fivePercentTaxMinBase + 1, fivePercentTaxValue},
+		{"Maximum amount property value -1 in bound", 5, tenPercentTaxMinBase - 1, 3749.95},
+		{"Maximum amount of within band Tax", 5, tenPercentTaxMinBase, 3750},
+		{"Maximum amount of beyond band Tax", 5, tenPercentTaxMinBase + 1, 3750},
+
+		//10 percent tests
+		{"No Tax", 10, fivePercentTaxMinBase, 0},
+		{"Minimum amount of Tax", 10, tenPercentTaxMinBase + 1, tenPercentTaxValue},
+		{"Maximum amount property value -1 in bound", 10, tenPercentTaxMax - 1, 42499.9},
+		{"Maximum amount of within band Tax", 10, tenPercentTaxMax, 42500},
+		{"Maximum amount of beyond band Tax", 10, tenPercentTaxMax + 1, 42500},
+	}
+
+	for _, testCase := range taxBand {
+		want := testCase.want
+
+		if testCase.percentage == 2 {
+
+			t.Run(testCase.name, func(t *testing.T) {
+				got := calculateTaxBandof2Percent(testCase.houseValue)
+
+				assertTestFailMessage(t, got, want)
+			})
+
+		}
+
+		if testCase.percentage == 5 {
+
+			t.Run(testCase.name, func(t *testing.T) {
+				got := calculateTaxBandof5Percent(testCase.houseValue)
+
+				assertTestFailMessage(t, got, want)
+			})
+
+		}
+
+		if testCase.percentage == 10 {
+
+			t.Run(testCase.name, func(t *testing.T) {
+				got := calculateTaxBandOf10Percent(testCase.houseValue)
+
+				assertTestFailMessage(t, got, want)
+			})
+
+		}
+
+	}
+}
 func Test2PercentTaxBand(t *testing.T) {
 	var minBandValue float64 = tax.TwoPercentTaxMinBase
 	var maxBandValue float64 = tax.FivePercentTaxMinBase
