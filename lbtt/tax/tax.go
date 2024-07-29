@@ -1,5 +1,7 @@
 package tax
 
+import "math"
+
 type taxBand struct {
 	BandMin    float64
 	BandMax    float64
@@ -26,7 +28,7 @@ var TenPercentBand taxBand = taxBand{
 
 var TwelvePercentBand taxBand = taxBand{
 	BandMin:    750000.00,
-	BandMax:    99999999999999,
+	BandMax:    math.MaxInt64,
 	TaxDecimal: 0.12,
 }
 

@@ -29,14 +29,14 @@ func TestCalculateTotalLBTT(t *testing.T) {
 
 	t.Run("Calculate total LBTT for a 250,001 property", func(t *testing.T) {
 		got := calculateTotalLBTT(250001)
-		var want int64 = 2100.00
+		var want int64 = 2100
 
 		assertTestFailMessage(t, got, want)
 	})
 
 	t.Run("Calculate total LBTT for a 325,001 property", func(t *testing.T) {
 		got := calculateTotalLBTT(325001)
-		var want int64 = 5850.0
+		var want int64 = 5850
 
 		assertTestFailMessage(t, got, want)
 	})

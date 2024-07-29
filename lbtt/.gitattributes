@@ -1,1 +1,4 @@
+*.go text eol=crlf
+*.mod text eol=crlf
+*.bat text eol=crlf
 *text=auto
